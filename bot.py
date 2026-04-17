@@ -65,4 +65,13 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CallbackQueryHandler(handle_package, pattern="^p"))
 app.add_handler(CallbackQueryHandler(confirm, pattern="^paid"))
 
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+def run_dummy_server():
+    server = HTTPServer(("0.0.0.0", 10000), BaseHTTPRequestHandler)
+    server.serve_forever()
+
+threading.Thread(target=run_dummy_server).start()
+
 app.run_polling()
