@@ -1,105 +1,68 @@
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    CallbackQueryHandler,
-    ContextTypes
-)
-
-# =========================
-# BOT SETTINGS
-# =========================
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 WALLET_ADDRESS = "TTD267vkgzaDy4PXJ1hyJ3LHVyZSrt81e6"
 NETWORK = "TRC20"
 
-# =========================
-# PACKAGES
-# =========================
-
 packages = {
-    "p1": {"name": "5 Credits", "price": 8},
-    "p2": {"name": "10 Credits", "price": 15},
-    "p3": {"name": "20 Credits", "price": 25},
-    "p4": {"name": "30 Credits", "price": 34},
-    "p5": {"name": "50 Credits", "price": 50},
-    "p6": {"name": "100 Credits", "price": 91},
+    "p1": ("5 Credits", 8),
+    "p2": ("10 Credits", 15),
+    "p3": ("20 Credits", 25),
+    "p4": ("30 Credits", 34),
+    "p5": ("50 Credits", 50),
+    "p6": ("100 Credits", 91),
 }
-
-# =========================
-# START COMMAND
-# =========================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("5 Credits - $8", callback_data="p1")],
-        [InlineKeyboardButton("10 Credits - $15", callback_data="p2")],
-        [InlineKeyboardButton("20 Credits - $25", callback_data="p3")],
-        [InlineKeyboardButton("30 Credits - $34", callback_data="p4")],
-        [InlineKeyboardButton("50 Credits - $50", callback_data="p5")],
-        [InlineKeyboardButton("100 Credits - $91", callback_data="p6")],
+        [InlineKeyboardButton("5 Credit cards - $8", callback_data="p1")],
+        [InlineKeyboardButton("10 Credit cards - $15", callback_data="p2")],
+        [InlineKeyboardButton("20 Credit cards - $25", callback_data="p3")],
+        [InlineKeyboardButton("30 Credit cards - $34", callback_data="p4")],
+        [InlineKeyboardButton("50 Credit cards - $50", callback_data="p5")],
+        [InlineKeyboardButton("100 Credit cards - $91", callback_data="p6")],
     ]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
     await update.message.reply_text(
-        "💰 Welcome to Hubtel Bot 💰\n\n"
-        "Choose a package below:",
-        reply_markup=reply_markup
+        "💰 Welcome to Hubtel Bot\n\nChoose a package:",
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
-
-# =========================
-# PACKAGE SELECTED
-# =========================
 
 async def handle_package(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    package = packages[query.data]
+    name, price = packages[query.data]
 
     keyboard = [
-        [InlineKeyboardButton("✅ I Have Paid", callback_data=f"paid_{query.data}")]
+        [InlineKeyboardButton("✅ I Have Paid", callback_data="paid")]
     ]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
     await query.message.reply_text(
-        f"🛒 {package['name']}\n"
-        f"💵 Amount: ${package['price']}\n\n"
-        f"💳 Send USDT using {NETWORK} Network only\n\n"
-        f"📍 Wallet Address:\n{WALLET_ADDRESS}\n\n"
-        f"⚠️ Do NOT send on ERC20 or BEP20\n\n"
-        f"After payment click ✅ I Have Paid",
-        reply_markup=reply_markup
+        f"🛒 {name}\n"
+        f"💵 Price: ${price}\n\n"
+        f"💳 Send USDT (TRC20 ONLY)\n\n"
+        f"📍 Wallet:\n{WALLET_ADDRESS}\n\n"
+        f"⚠️ Network: {NETWORK}\n\n"
+        f"After payment click below:",
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-# =========================
-# PAYMENT BUTTON CLICKED
-# =========================
-
-async def confirm_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     await query.message.reply_text(
-        "⏳ Payment request received.\n\n"
-        "Please wait while your payment is reviewed."
+        "⏳ Payment submitted.\nPlease wait for confirmation."
     )
-
-# =========================
-# MAIN BOT
-# =========================
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CallbackQueryHandler(handle_package, pattern="^p"))
-app.add_handler(CallbackQueryHandler(confirm_payment, pattern="^paid_"))
-
-print("Hubtel Bot is running...")
+app.add_handler(CallbackQueryHandler(confirm, pattern="^paid"))
 
 app.run_polling()
