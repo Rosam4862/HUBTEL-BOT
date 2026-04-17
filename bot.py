@@ -47,6 +47,7 @@ async def handle_package(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"💳 Send USDT (TRC20 ONLY)\n\n"
         f"📍 Wallet:\n{WALLET_ADDRESS}\n\n"
         f"⚠️ Network: {NETWORK}\n\n"
+        f"⏱️ Note: This wallet address is valid for 30 minutes only.\n\n"
         f"After payment click below:",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
